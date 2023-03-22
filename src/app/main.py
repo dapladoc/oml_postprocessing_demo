@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import Dict, Union
 
 import streamlit as st
-from controls import QueryViewer, show_retrieval_results
+from controls import show_retrieval_results
 
 from data import QueryDataset, load_gallery_dataset, load_query_dataset
 from src.const import (
