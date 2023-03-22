@@ -2,6 +2,8 @@
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from collections import defaultdict
 from typing import Dict, Union
@@ -80,7 +82,6 @@ def main():
         sample,
         gallery_dataset,
         matching_type=RetrievalResultsType.before_stir,
-        show_controls=True,
     )
     st.subheader("Baseline model + STIR postprocessing")
     show_retrieval_results(
@@ -89,8 +90,15 @@ def main():
         sample,
         gallery_dataset,
         matching_type=RetrievalResultsType.after_stir,
-        show_controls=False,
     )
+    prev, random, next = st.columns(9, gap="small")[3:6]
+    prev.button("Prev", on_click=_add_to_viewer_position, args=(-1,))
+    random.button("Rand", on_click=_add_to_viewer_position, args=(np.random.randint(0, 1e10),))
+    next.button("Next", on_click=_add_to_viewer_position, args=(1,))
+
+
+def _add_to_viewer_position(v: int):
+    st.session_state.query_controller_position += v
 
 
 @st.cache_resource(show_spinner=True)

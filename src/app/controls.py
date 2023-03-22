@@ -10,18 +10,9 @@ from src.const import BLACK_COLOR, BORDER_SIZE, GREEN_COLOR, SIZE, RetrievalResu
 
 
 class RetrievalResultsViewer:
-    def __init__(self, n: int, more_info_flag: bool, create_controls: bool = False):
+    def __init__(self, n: int, more_info_flag: bool):
         self.more_info_flag = more_info_flag
         self.cols = st.columns(n + 1)  # 1 for query
-        if create_controls:
-            with st.columns([1, 4])[0]:
-                self.prev, self.random, self.next = st.columns([1, 1, 1], gap="small")
-            self.prev.button("Prev", on_click=self._add_to_viewer_position, args=(-1,))
-            self.random.button("Rand", on_click=self._add_to_viewer_position, args=(np.random.randint(0, 1e10),))
-            self.next.button("Next", on_click=self._add_to_viewer_position, args=(1,))
-
-    def _add_to_viewer_position(self, v: int):
-        st.session_state.query_controller_position += v
 
     def show(self, images: List[np.ndarray], infos: List[Dict[str, str]]):
         for col, image, info in zip(self.cols, images, infos):
@@ -41,7 +32,6 @@ def show_retrieval_results(
     sample: QuerySample,
     gallery_dataset: GalleryDataset,
     matching_type: RetrievalResultsType,
-    show_controls: bool,
 ):
     query_image = sample.load_image()
     query_image = pad_image_to_square(query_image, SIZE - BORDER_SIZE)
@@ -78,5 +68,5 @@ def show_retrieval_results(
                 "Distance": score,
             }
         )
-    viewer = RetrievalResultsViewer(top_k, more_info_flag, show_controls)
+    viewer = RetrievalResultsViewer(top_k, more_info_flag)
     viewer.show(images, infos)
