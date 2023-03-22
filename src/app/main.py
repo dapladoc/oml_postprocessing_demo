@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import Dict, Union
 
 import streamlit as st
-from controls import GalleryViewer, QueryViewer, show_query, show_retrieval_results
+from controls import QueryViewer, show_retrieval_results
 
 from data import QueryDataset, load_gallery_dataset, load_query_dataset
 from src.const import (
@@ -69,21 +69,28 @@ def main():
     more_info_flag = st.sidebar.checkbox(label="Show more info")
     set_session_state(dataset_name, category_name, filter_by, improvement_flag)
 
-    st.title("Query")
-    query_viewer = QueryViewer(more_info_flag)
     sample = category_dataset[st.session_state.query_controller_position]
-    show_query(query_viewer, sample)
 
     st.title("Retrieval results")
     top_k = min(query_dataset.max_top_k, TOP_K)
     st.subheader("Baseline model")
-    baseline_results_viewer = GalleryViewer(top_k, more_info_flag)
     show_retrieval_results(
-        baseline_results_viewer, sample, gallery_dataset, matching_type=RetrievalResultsType.before_stir
+        top_k,
+        more_info_flag,
+        sample,
+        gallery_dataset,
+        matching_type=RetrievalResultsType.before_stir,
+        show_controls=True,
     )
     st.subheader("Baseline model + STIR postprocessing")
-    stir_results_viewer = GalleryViewer(top_k, more_info_flag)
-    show_retrieval_results(stir_results_viewer, sample, gallery_dataset, matching_type=RetrievalResultsType.after_stir)
+    show_retrieval_results(
+        top_k,
+        more_info_flag,
+        sample,
+        gallery_dataset,
+        matching_type=RetrievalResultsType.after_stir,
+        show_controls=False,
+    )
 
 
 @st.cache_resource(show_spinner=True)
@@ -95,7 +102,8 @@ def download_datasets(datasets: Dict[str, Dict[str, Dict[str, str]]]) -> Dict[st
         for data_name, gdrive_id in dataset_info["gdrive_ids"].items():
             local_path = dataset_info["local_paths"][data_name]
             Path(local_path).parent.mkdir(parents=True, exist_ok=True)
-            gdown.download(id=gdrive_id, output=local_path, quiet=False)
+            if not Path(local_path).exists():
+                gdown.download(id=gdrive_id, output=local_path, quiet=False)
             output[dataset_name][data_name] = dataset_info["local_paths"][data_name]
     return output
 

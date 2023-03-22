@@ -6,31 +6,22 @@ import streamlit as st
 from utils import pad_image_to_square
 
 from data import GalleryDataset, QuerySample
-from src.const import BORDER_SIZE, GREEN_COLOR, SIZE, RetrievalResultsType
+from src.const import BLACK_COLOR, BORDER_SIZE, GREEN_COLOR, SIZE, RetrievalResultsType
 
 
-class QueryViewer:
-    def __init__(self, more_info_flag: bool):
+class RetrievalResultsViewer:
+    def __init__(self, n: int, more_info_flag: bool, create_controls: bool = False):
         self.more_info_flag = more_info_flag
-        tmp_col1 = st.columns([1, 2])[0]
-        with tmp_col1:
-            self.image_widget = st.columns(1)[0]
-            self.prev, self.random, self.next = st.columns([1, 1, 1], gap="small")
-        self.prev.button("Prev", on_click=self._add_to_viewer_position, args=(-1,))
-        self.random.button("Rand", on_click=self._add_to_viewer_position, args=(np.random.randint(0, 1e10),))
-        self.next.button("Next", on_click=self._add_to_viewer_position, args=(1,))
+        self.cols = st.columns(n + 1)  # 1 for query
+        if create_controls:
+            with st.columns([1, 4])[0]:
+                self.prev, self.random, self.next = st.columns([1, 1, 1], gap="small")
+            self.prev.button("Prev", on_click=self._add_to_viewer_position, args=(-1,))
+            self.random.button("Rand", on_click=self._add_to_viewer_position, args=(np.random.randint(0, 1e10),))
+            self.next.button("Next", on_click=self._add_to_viewer_position, args=(1,))
 
     def _add_to_viewer_position(self, v: int):
         st.session_state.query_controller_position += v
-
-    def show(self, image: np.ndarray, info: Dict[str, str]):
-        show_image_card(self.image_widget, image, info, self.more_info_flag)
-
-
-class GalleryViewer:
-    def __init__(self, n: int, more_info_flag: bool):
-        self.more_info_flag = more_info_flag
-        self.cols = st.columns(n)
 
     def show(self, images: List[np.ndarray], infos: List[Dict[str, str]]):
         for col, image, info in zip(self.cols, images, infos):
@@ -44,17 +35,23 @@ def show_image_card(st_, image, info, show_info_flag: bool) -> None:
             st_.markdown(f"**{k}**: {v}")
 
 
-def show_query(query_viewer: QueryViewer, sample: QuerySample) -> None:
-    image = sample.load_image()
-    image = pad_image_to_square(image, SIZE, BORDER_SIZE)
-    info: Dict[str, str] = {"Label": str(sample.label), "Category": sample.category}
-    query_viewer.show(image, info)
-
-
 def show_retrieval_results(
-    viewer: GalleryViewer, sample: QuerySample, gallery_dataset: GalleryDataset, matching_type: RetrievalResultsType
+    top_k: int,
+    more_info_flag: bool,
+    sample: QuerySample,
+    gallery_dataset: GalleryDataset,
+    matching_type: RetrievalResultsType,
+    show_controls: bool,
 ):
+    query_image = sample.load_image()
+    query_image = pad_image_to_square(query_image, SIZE - BORDER_SIZE)
+    query_image = cv2.copyMakeBorder(
+        query_image, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, cv2.BORDER_CONSTANT, value=BLACK_COLOR
+    )
     images = []
+    infos = []
+    images.append(query_image)
+    infos.append({"Label": str(sample.label), "Category": sample.category})
     top_k_images_ids = (
         sample.top_k_images_ids
         if matching_type == RetrievalResultsType.before_stir
@@ -63,7 +60,6 @@ def show_retrieval_results(
     top_k_scores = (
         sample.top_k_scores if matching_type == RetrievalResultsType.before_stir else sample.postprocessed_top_k_scores
     )
-    infos = []
     for image_id, score in zip(top_k_images_ids, top_k_scores):
         gallery_sample = gallery_dataset.find_by_id(image_id)
         image = gallery_sample.load_image()
@@ -82,4 +78,5 @@ def show_retrieval_results(
                 "Distance": score,
             }
         )
+    viewer = RetrievalResultsViewer(top_k, more_info_flag, show_controls)
     viewer.show(images, infos)
