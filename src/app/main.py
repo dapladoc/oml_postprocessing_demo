@@ -92,9 +92,9 @@ def main():
         matching_type=RetrievalResultsType.after_stir,
     )
     prev, random, next = st.columns(9, gap="small")[3:6]
-    prev.button("Prev", on_click=_add_to_viewer_position, args=(-1,))
-    random.button("Rand", on_click=_add_to_viewer_position, args=(np.random.randint(0, 1e10),))
-    next.button("Next", on_click=_add_to_viewer_position, args=(1,))
+    prev.button("Previous query", on_click=_add_to_viewer_position, args=(-1,))
+    random.button("Random query", on_click=_add_to_viewer_position, args=(np.random.randint(0, 1e10),))
+    next.button("Next query", on_click=_add_to_viewer_position, args=(1,))
 
 
 def _add_to_viewer_position(v: int):
