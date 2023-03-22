@@ -88,8 +88,6 @@ def main():
 
 @st.cache_resource(show_spinner=True)
 def download_datasets(datasets: Dict[str, Dict[str, Dict[str, str]]]) -> Dict[str, Dict[str, str]]:
-    from pathlib import Path
-
     import gdown
 
     output: Dict[str, Dict[str, str]] = defaultdict(dict)
@@ -98,7 +96,6 @@ def download_datasets(datasets: Dict[str, Dict[str, Dict[str, str]]]) -> Dict[st
             local_path = dataset_info["local_paths"][data_name]
             Path(local_path).parent.mkdir(parents=True, exist_ok=True)
             gdown.download(id=gdrive_id, output=local_path, quiet=False)
-            st.success(f"Loaded {data_name} file for {dataset_name} dataset.")
             output[dataset_name][data_name] = dataset_info["local_paths"][data_name]
     return output
 
