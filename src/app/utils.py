@@ -1,6 +1,10 @@
-import cv2
-import requests
+import asyncio
+from typing import List
 
+import cv2
+import numpy as np
+
+from src.app.data import Sample
 from src.const import WHITE_COLOR
 
 
@@ -21,33 +25,13 @@ def pad_image_to_square(image, size, border_size=0, color=WHITE_COLOR):
     return image
 
 
-def download_file_from_google_drive(id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-
-    session = requests.Session()
-
-    response = session.get(URL, params={"id": id}, stream=True)
-    token = get_confirm_token(response)
-
-    if token:
-        params = {"id": id, "confirm": token}
-        response = session.get(URL, params=params, stream=True)
-
-    save_response_content(response, destination)
+async def load_one_image_for_sample(sample: Sample) -> np.ndarray:
+    return sample.load_image()
 
 
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith("download_warning"):
-            return value
-
-    return None
+async def _load_images_for_samples(samples):
+    return await asyncio.gather(*[load_one_image_for_sample(sample) for sample in samples])
 
 
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
-
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+def load_images_for_samples(samples: List[Sample]) -> List[np.ndarray]:
+    return list(asyncio.run(_load_images_for_samples(samples)))

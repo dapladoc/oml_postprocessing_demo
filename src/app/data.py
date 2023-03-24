@@ -30,8 +30,8 @@ class Sample:
     label: int
     zip: ZipFile
 
-    def load_image(self):
-        return np.array(Image.open(self.zip.open(self.path)))
+    def load_image(self) -> np.ndarray:
+        return np.array(Image.open(self.zip.open(str(self.path))))
 
 
 @dataclass
@@ -48,7 +48,7 @@ class GallerySample(Sample):
 
 class Dataset:
     def __init__(self, csv_path: PathType, zip_path: PathType):
-        self.data = pd.read_csv(csv_path)
+        self.data = pd.read_csv(csv_path).sort_values(by=[CATEGORIES_COLUMN])
         self.zip_path = zip_path
 
     @property
@@ -64,9 +64,12 @@ class Dataset:
         dataset.data = dataset.data[dataset.data[property_name] == property_value]
         return dataset
 
-    def find_by_id(self, image_id: int):
+    def find_sample_by_id(self, image_id: int):
         item = self.data.index[self.data[ID_COLUMN] == image_id][0]
         return self[item]
+
+    def find_first_occurrence_ind(self, property_name: str, property_value: Any) -> int:
+        return np.where(self.data[property_name] == property_value)[0][0]
 
     def __len__(self):
         return self.data.shape[0]
