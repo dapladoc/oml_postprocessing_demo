@@ -48,7 +48,7 @@ class GallerySample(Sample):
 
 class Dataset:
     def __init__(self, csv_path: PathType, zip_path: PathType):
-        self.data = pd.read_csv(csv_path).sort_values(by=[CATEGORIES_COLUMN])
+        self.data = pd.read_csv(csv_path)
         self.zip_path = zip_path
 
     @property
@@ -79,6 +79,10 @@ class Dataset:
 
 
 class QueryDataset(Dataset):
+    def __init__(self, csv_path: PathType, zip_path: PathType):
+        super().__init__(csv_path, zip_path)
+        self.data = self.data.sort_values(by=[CATEGORIES_COLUMN])
+
     @property
     def max_top_k(self):
         return max(int(s.split("_")[1]) for s in self.data.columns if s.startswith("top_"))
