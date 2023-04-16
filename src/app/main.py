@@ -15,6 +15,8 @@ from data import QueryDataset, load_gallery_dataset, load_query_dataset
 from src.const import (
     DATASETS,
     IMPROVED_SUFFIX,
+    MAIN_PAGE_ABSTRACT,
+    MAIN_PAGE_TITLE,
     METRICS_TO_EXCLUDE_FROM_VIEWER,
     TOP_K,
     ImprovementFlags,
@@ -26,6 +28,10 @@ st.set_page_config(layout="wide", page_title="similarity-api")
 
 def main():
     datasets = download_datasets(DATASETS)
+
+    st.title(MAIN_PAGE_TITLE)
+    st.markdown(MAIN_PAGE_ABSTRACT)
+
     st.sidebar.subheader("Dataset")
     dataset_name = st.sidebar.selectbox("Dataset", datasets, label_visibility="collapsed")
     query_dataset = load_query_dataset(datasets[dataset_name]["query"], datasets[dataset_name]["zip"])
