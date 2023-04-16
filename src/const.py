@@ -46,7 +46,10 @@ with hard negatives mining) and then we introduce a Siamese Transformer for Imag
 reranks top retrieval outputs.
 It takes pairs of a query and each image in top outputs, concatenates them in pixel space, and re-estimate
 the distance between them. The pixel-to-pixel comparison allows STIR to improve the original retrieval metrics of
-the Baseline model."""
+the Baseline model.
+
+**GitHub**: https://github.com/OML-Team/open-metric-learning
+"""
 MAIN_PAGE_IMAGE_PATH = "src/app/assets/pic_1.jpg"
 LABELS_COLUMN = "label"
 PATHS_COLUMN = "path"
