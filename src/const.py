@@ -41,18 +41,13 @@ LOCAL_DATASETS = {
     },
 }
 MAIN_PAGE_TITLE = "STIR: Siamese Transformer for Image Retrieval Postprocessing"
-MAIN_PAGE_ABSTRACT = """Current metric learning approaches for image retrieval are usually based on
-learning a space of informative latent representations where simple approaches such as the cosine
-distance will work well. Recent state of the art methods such as HypViT move to more complex embedding
-spaces that may yield better results but are harder to scale to production environments.
-In this work, we first construct a simpler model based on triplet loss with hard negatives mining that
-performs at the state of the art level but does not have these drawbacks.
-Second, we introduce a novel approach for image retrieval postprocessing called
-Siamese Transformer for Image Retrieval (STIR) that reranks several top outputs in a single forward pass.
-Unlike previously proposed Reranking Transformers, STIR does not rely on global/local feature extraction
-and is applicable to end-to-end Transformer-based models.
-The resulting approach deines a new state of the art on standard image retrieval datasets:
-Stanford Online Products and DeepFashion In-shop."""
+MAIN_PAGE_ABSTRACT = """In this work, we first construct a simple Baseline model (trained with a triplet loss
+with hard negatives mining) and then we introduce a Siamese Transformer for Image Retrieval (STIR) that
+reranks top retrieval outputs.
+It takes pairs of a query and each image in top outputs, concatenates them in pixel space, and re-estimate
+the distance between them. The pixel-to-pixel comparison allows STIR to improve the original retrieval metrics of
+the Baseline model."""
+MAIN_PAGE_IMAGE_PATH = "src/app/assets/pic_1.jpg"
 LABELS_COLUMN = "label"
 PATHS_COLUMN = "path"
 SPLIT_COLUMN = "split"

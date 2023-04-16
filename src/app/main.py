@@ -2,11 +2,12 @@
 import sys
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from collections import defaultdict
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 import streamlit as st
 from controls import show_retrieval_results
@@ -16,6 +17,7 @@ from src.const import (
     DATASETS,
     IMPROVED_SUFFIX,
     MAIN_PAGE_ABSTRACT,
+    MAIN_PAGE_IMAGE_PATH,
     MAIN_PAGE_TITLE,
     METRICS_TO_EXCLUDE_FROM_VIEWER,
     TOP_K,
@@ -30,7 +32,10 @@ def main():
     datasets = download_datasets(DATASETS)
 
     st.title(MAIN_PAGE_TITLE)
-    st.markdown(MAIN_PAGE_ABSTRACT)
+    abstract_text_column, abstract_image_column = st.columns([1, 1.5])
+    abstract_text_column.markdown(MAIN_PAGE_ABSTRACT)
+
+    abstract_image_column.image(cv2.imread(MAIN_PAGE_IMAGE_PATH)[..., ::-1])
 
     st.sidebar.subheader("Dataset")
     dataset_name = st.sidebar.selectbox("Dataset", datasets, label_visibility="collapsed")
@@ -47,23 +52,7 @@ def main():
     )
     filter_by = filter_options[filter_by]
 
-    improvement_flag = ""
-    if filter_by:
-        improved_query_dataset = query_dataset.filter(filter_by, 1)
-        worsened_query_dataset = query_dataset.filter(filter_by, -1)
-        improvement_flag_options = [
-            f"{ImprovementFlags.improvements.value} ({len(improved_query_dataset)})",
-            f"{ImprovementFlags.worsenings.value} ({len(worsened_query_dataset)})",
-        ]
-        improvement_flag = st.sidebar.radio(
-            "Filter type",
-            options=improvement_flag_options,
-            disabled=not bool(filter_by),
-        )
-        if improvement_flag == improvement_flag_options[0]:
-            query_dataset = improved_query_dataset
-        else:
-            query_dataset = worsened_query_dataset
+    improvement_flag, query_dataset = filter_query_dataset_by_improvement_flag(filter_by, query_dataset)
 
     if len(query_dataset) == 0:
         st.markdown("There is no query to fulfill the filter requirements.")
@@ -97,10 +86,31 @@ def main():
         gallery_dataset,
         matching_type=RetrievalResultsType.after_stir,
     )
-    prev, random, next = st.columns(9, gap="small")[3:6]
+    prev, random, next_ = st.columns(9, gap="small")[3:6]
     prev.button("Previous query", on_click=_add_to_viewer_position, args=(-1,))
     random.button("Random query", on_click=_add_to_viewer_position, args=(np.random.randint(0, 1e10),))
-    next.button("Next query", on_click=_add_to_viewer_position, args=(1,))
+    next_.button("Next query", on_click=_add_to_viewer_position, args=(1,))
+
+
+def filter_query_dataset_by_improvement_flag(filter_by: str, query_dataset: QueryDataset) -> Tuple[str, QueryDataset]:
+    improvement_flag = ""
+    if filter_by:
+        improved_query_dataset = query_dataset.filter(filter_by, 1)
+        worsened_query_dataset = query_dataset.filter(filter_by, -1)
+        improvement_flag_options = [
+            f"{ImprovementFlags.improvements.value} ({len(improved_query_dataset)})",
+            f"{ImprovementFlags.worsenings.value} ({len(worsened_query_dataset)})",
+        ]
+        improvement_flag = st.sidebar.radio(
+            "Filter type",
+            options=improvement_flag_options,
+            disabled=not bool(filter_by),
+        )
+        if improvement_flag == improvement_flag_options[0]:
+            query_dataset = improved_query_dataset
+        else:
+            query_dataset = worsened_query_dataset
+    return improvement_flag, query_dataset
 
 
 def _add_to_viewer_position(v: int):
