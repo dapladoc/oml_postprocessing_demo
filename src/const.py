@@ -48,7 +48,7 @@ It takes pairs of a query and each image in top outputs, concatenates them in pi
 the distance between them. The pixel-to-pixel comparison allows STIR to improve the original retrieval metrics of
 the Baseline model.
 
-**GitHub**: https://github.com/OML-Team/open-metric-learning
+Implemented in [OpenMetricLearning](https://github.com/OML-Team/open-metric-learning/tree/docs/pipelines/postprocessing/pairwise_postprocessing)
 """
 MAIN_PAGE_IMAGE_PATH = "src/app/assets/pic_1.jpg"
 LABELS_COLUMN = "label"
