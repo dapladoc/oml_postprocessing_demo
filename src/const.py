@@ -40,7 +40,7 @@ LOCAL_DATASETS = {
         "zip": "data/InShop/InShop_images.zip",
     },
 }
-MAIN_PAGE_TITLE = "STIR: Siamese Transformer for Image Retrieval Postprocessing"
+MAIN_PAGE_TITLE = r"[STIR: Siamese Transformer for Image Retrieval Postprocessing](https://arxiv.org/abs/2304.13393)"
 MAIN_PAGE_ABSTRACT = """In this work, we first construct a simple Baseline model (trained with a triplet loss
 with hard negatives mining) and then we introduce a Siamese Transformer for Image Retrieval (STIR) that
 reranks top retrieval outputs.
